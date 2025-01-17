@@ -4,11 +4,6 @@
 
 ## Installation 👍
 
-vmware :
-
-- [https://drive.google.com/file/d/1rA9P9l8KgTvcVEdGXB9p0iwRv2BRmMd1/view?usp=drive_link]
-- [https://drive.google.com/file/d/1CAGnrzeX0yUIPN40tPY2YwrkogZZjixn/view?usp=drive_link]
-
 virtualox :
 
 - [https://www.virtualbox.org/wiki/Downloads]
