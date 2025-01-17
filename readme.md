@@ -2,20 +2,22 @@
 
 [https://developer.hashicorp.com/vagrant]
 
-## Installation 👍
+## Install virtualization software 👍
 
 virtualox :
 
 - [https://www.virtualbox.org/wiki/Downloads]
 
-docker :
+utm :
+
+- [https://mac.getutm.app/]
+
+## Install Docker : platform designed to help developers build, share, and run container applications
 
 - [https://docs.docker.com/engine/install/]
 - [https://docs.docker.com/desktop/]
 
-utm :
-
-- [https://mac.getutm.app/]
+## Install Vagrant
 
 vagrant :
 
@@ -45,7 +47,7 @@ vagrant autocomplete install --bash --zsh
 ```bash
 mkdir vagrant_getting_started
 cd vagrant_getting_started
-vagrant init hashicorp/bionic64 # génère le fichier Vagrantfile 👍
+vagrant init hashicorp/bionic64 # create Vagrantfile 👍
 # vagrant box add hashicorp/bionic64 # optionel
 ```
 
@@ -54,13 +56,14 @@ vagrant init hashicorp/bionic64 # génère le fichier Vagrantfile 👍
 ```bash
 mkdir vagrant_getting_started
 cd vagrant_getting_started
-vagrant init utm/bookworm # génère le fichier Vagrantfile 👍
+vagrant init utm/bookworm # create Vagrantfile 👍
 # vagrant box add utm/bookworm # optionel
 ```
 
 ## Manage
 
 ```bash
+# vagrant --help
 cat Vagrantfile
 vagrant validate
 vagrant up
@@ -133,13 +136,15 @@ end
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 Vagrant.configure("2") do |config|
   config.vm.provider "docker" do |conteneur|
-    conteneur.image = "nginx"
+    conteneur.image = "nginx" # https://hub.docker.com/_/nginx
     conteneur.ports = ["80:80"]
     conteneur.name = "nginx-container"
   end
   config.vm.synced_folder ".", "/vagrant"
 end
 ```
+
+#### Quick Docker worflow
 
 - Docker Image 👍
   - Create Dockerfile
@@ -156,7 +161,7 @@ end
       apt-get -qq clean; \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-  RUN apt-get update && apt-get install -y iproute2 git curl iputils-ping net-tools wget curl
+  RUN apt-get update && apt-get install -y iproute2 git curl iputils-ping net-tools wget curl nginx
   RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
       rm -f /lib/systemd/system/multi-user.target.wants/*; \
       rm -f /etc/systemd/system/*.wants/*; \
@@ -187,20 +192,20 @@ end
   - Build image docker
 
   ```bash
-  docker build -t bootcamp:vagrant .
+  docker build -t server:vagrant .
   ```
 
 ```ruby
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 Vagrant.configure("2") do |config|
-    config.vm.define "serveur_web" do |serveur_web|
-    serveur_web.vm.network "forwarded_port", guest: 80, host: 9000
-    serveur_web.vm.provider "docker" do |serveur_web|
-    serveur_web.image = "bootcamp:vagrant"
-    serveur_web.has_ssh = true
-    serveur_web.privileged = true
-    serveur_web.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
-      serveur_web.name = "serveur_web"
+    config.vm.define "server" do |server|
+    server.vm.network "forwarded_port", guest: 80, host: 9000
+    server.vm.provider "docker" do |server|
+    server.image = "server:vagrant" # image docker
+    server.has_ssh = true
+    server.privileged = true
+    server.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
+      server.name = "server"
    end
   end
 end
@@ -210,43 +215,43 @@ end
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 
 Vagrant.configure("2") do |config|
-    config.vm.define "bootcamp_1" do |bootcamp_1|
-    bootcamp_1.vm.network :private_network, type: "static", ip: "192.168.1.10", netmask: 24
-    bootcamp_1.vm.hostname="bootcamp1"
-    bootcamp_1.vm.provider "docker" do |bootcamp_1|
-    bootcamp_1.image = "bootcamp:vagrant" # image docker
-    bootcamp_1.has_ssh = true
-    bootcamp_1.privileged = true
-    bootcamp_1.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
-            bootcamp_1.name = "bootcamp_1"
+    config.vm.define "server_1" do |server_1|
+    server_1.vm.network :private_network, type: "static", ip: "192.168.1.10", netmask: 24
+    server_1.vm.hostname="server1"
+    server_1.vm.provider "docker" do |server_1|
+    server_1.image = "server:vagrant" # image docker
+    server_1.has_ssh = true
+    server_1.privileged = true
+    server_1.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
+            server_1.name = "server_1"
    end
   end
 end
 Vagrant.configure("2") do |config|
-    config.vm.define "bootcamp_2" do |bootcamp_2|
-    bootcamp_2.vm.network :private_network,type: "static", ip: "192.168.1.11", netmask: 24
-        bootcamp_2.vm.network :private_network, ip: "192.168.2.11", netmask: 24
-        bootcamp_2.vm.hostname="bootcamp2"
-    bootcamp_2.vm.provider "docker" do |bootcamp_2|
-    bootcamp_2.image = "bootcamp:vagrant" # image docker
-    bootcamp_2.has_ssh = true
-    bootcamp_2.privileged = true
-    bootcamp_2.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
-            bootcamp_2.name = "bootcamp_2"
+    config.vm.define "server_2" do |server_2|
+    server_2.vm.network :private_network,type: "static", ip: "192.168.1.11", netmask: 24
+        server_2.vm.network :private_network, ip: "192.168.2.11", netmask: 24
+        server_2.vm.hostname="server2"
+    server_2.vm.provider "docker" do |server_2|
+    server_2.image = "server:vagrant" # image docker
+    server_2.has_ssh = true
+    server_2.privileged = true
+    server_2.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
+            server_2.name = "server_2"
    end
   end
 end
 
 Vagrant.configure("2") do |config|
-    config.vm.define "bootcamp_3" do |bootcamp_3|
-    bootcamp_3.vm.network :private_network, type: "static", ip: "192.168.2.10", netmask: 24
-    bootcamp_3.vm.hostname="bootcamp3"
-    bootcamp_3.vm.provider "docker" do |bootcamp_3|
-    bootcamp_3.image = "bootcamp:vagrant" # image docker
-    bootcamp_3.has_ssh = true
-    bootcamp_3.privileged = true
-    bootcamp_3.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
-            bootcamp_3.name = "bootcamp_3"
+    config.vm.define "server_3" do |server_3|
+    server_3.vm.network :private_network, type: "static", ip: "192.168.2.10", netmask: 24
+    server_3.vm.hostname="server3"
+    server_3.vm.provider "docker" do |server_3|
+    server_3.image = "server:vagrant" # image docker
+    server_3.has_ssh = true
+    server_3.privileged = true
+    server_3.create_args = ["-v", "/sys/fs/cgroup:/sys/fs/cgroup:ro"]
+            server_3.name = "server_3"
    end
   end
 end
